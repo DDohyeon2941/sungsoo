@@ -63,7 +63,7 @@ def get_deposit(cate_mask):
 
     var3 = (
         new_temp_df1.groupby(["0", "train_year"])
-        .mean()[["면적", "환산_보증금","per_deposit"]]
+        .mean(numeric_only=True)[["면적", "환산_보증금","per_deposit"]]
         .reset_index()
     )
     pivot_df = var3.pivot(index="0", columns="train_year", values=["면적", "환산_보증금","per_deposit"])
