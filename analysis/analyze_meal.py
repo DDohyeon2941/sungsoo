@@ -15,10 +15,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import font_manager, rc
 import shap
+import platform
 
 from sungsoo_preprocess_final import main
 
-font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+# OS에 따른 폰트 설정
+if platform.system() == 'Darwin': 
+    font_name = font_manager.FontProperties(fname='/System/Library/Fonts/Supplemental/AppleGothic.ttf').get_name()
+elif platform.system() == 'Windows': 
+    font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+else:  
+    font_name = "DejaVu Sans"
+
 rc('font', family=font_name)
 
 def split_train_test(total_df):
