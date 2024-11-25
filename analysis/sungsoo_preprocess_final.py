@@ -63,7 +63,7 @@ def get_deposit(cate_mask):
 
     var3 = (
         new_temp_df1.groupby(["0", "train_year"])
-        .mean(numeric_only=True)[["면적", "환산_보증금","per_deposit"]]
+        .mean()[["면적", "환산_보증금","per_deposit"]]
         .reset_index()
     )
     pivot_df = var3.pivot(index="0", columns="train_year", values=["면적", "환산_보증금","per_deposit"])
@@ -163,7 +163,7 @@ def main(cate_mask, keep_grid, paeup_grid):
     train_test_df1.rename(columns={0:'y'}, inplace=True)
 
     
-    train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','공지지가'], inplace=True)
+    train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','공지지가','환산_보증금'], inplace=True)
 
     train_test_df1= train_test_df1.reset_index().set_index(['level_0','level_1']).sort_index()
 
