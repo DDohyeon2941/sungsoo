@@ -122,17 +122,29 @@ def get_moving(new_transport_df):
     moving_df_2023 = pd.read_csv(r'sungsoo_grid_arrival_2023_20241114.csv')
     moving_df_2024 = pd.read_csv(r'sungsoo_grid_arrival_2024_20241114.csv')
 
+    moving_df_20231 = pd.read_csv(r'sungsoo_grid_arrival_2023_20241125.csv')
+    moving_df_20241 = pd.read_csv(r'sungsoo_grid_arrival_2024_20241125.csv')
+
 
     moving_df_2023.loc[:, 'date'] = pd.to_datetime(moving_df_2023['date'])
     moving_df_2023.set_index(['date','d_cell_id'], inplace=True)
+
+    moving_df_20231.loc[:, 'date'] = pd.to_datetime(moving_df_20231['date'])
+    moving_df_20231.set_index(['date','d_cell_id'], inplace=True)
 
 
     moving_df_2024.loc[:, 'date'] = pd.to_datetime(moving_df_2024['date'])
     moving_df_2024.set_index(['date','d_cell_id'], inplace=True)
 
 
+    moving_df_20241.loc[:, 'date'] = pd.to_datetime(moving_df_20241['date'])
+    moving_df_20241.set_index(['date','d_cell_id'], inplace=True)
 
-    moving_df_2023_2024 = pd.concat([moving_df_2023.loc[new_transport_df.loc['2023'].index],    moving_df_2024.loc[new_transport_df.loc['2024'].index]])
+    moving_df_2023_main = pd.concat([moving_df_2023.loc[new_transport_df.loc['2023'].index],    moving_df_20231.loc[new_transport_df.loc['2023'].index]], axis=1)
+
+    moving_df_2024_main = pd.concat([moving_df_2024.loc[new_transport_df.loc['2024'].index],    moving_df_20241.loc[new_transport_df.loc['2024'].index]], axis=1)
+
+    moving_df_2023_2024 = pd.concat([moving_df_2023_main, moving_df_2024_main])
 
     return moving_df_2023_2024
 
@@ -163,7 +175,7 @@ def main(cate_mask, keep_grid, paeup_grid):
     train_test_df1.rename(columns={0:'y'}, inplace=True)
 
     
-    train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','공지지가','환산_보증금'], inplace=True)
+    train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','sum_total_cnt1','공지지가','환산_보증금'], inplace=True)
 
     train_test_df1= train_test_df1.reset_index().set_index(['level_0','level_1']).sort_index()
 
