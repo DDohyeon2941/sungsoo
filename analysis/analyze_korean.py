@@ -49,11 +49,18 @@ def split_train_test(total_df):
 
 def train(train_x, train_y):
 
-    rf_model = RandomForestRegressor(random_state=42)
+    xgb_model = XGBRegressor(
+        random_state=42,
+        n_estimators=100,
+        learning_rate=0.05,
+        max_depth=3,
+        subsample=1.0,
+        colsample_bytree=0.8
+    )
 
-    rf_model.fit(train_x, train_y)
+    xgb_model.fit(train_x, train_y) 
 
-    return rf_model
+    return xgb_model
 
 def visualize_importance(fitted_model, test_df):
 
@@ -72,13 +79,15 @@ def visualize_importance(fitted_model, test_df):
     plt.ylabel('Importance')
     plt.xticks(rotation=90)
     plt.tight_layout()
-    plt.show()
+    plt.savefig('Feature_Importance.png')
+    #plt.show()
+    plt.close()
 
 
 if __name__=="__main__":
 
 
-    train_test_df1 = main(1, keep_grid= keep_grid, paeup_grid = paeup_grid)
+    train_test_df1 = main(0, keep_grid= keep_grid, paeup_grid = paeup_grid)
     _, test_df, train_x, train_y, test_x, test_y = split_train_test(train_test_df1)
 
     fitted_model = train(train_x, train_y)
@@ -99,11 +108,37 @@ if __name__=="__main__":
     # 테스트 데이터에 대해 SHAP 값 계산
     #%%
     shap_values = explainer.shap_values(test_x)
-    
-    shap.summary_plot(shap_values, test_df[test_df.columns[:-1]])
-    
+    plt.figure()
+    shap.summary_plot(shap_values, test_df[test_df.columns[:-1]], show=False)
+    plt.savefig("shap_test_df_summary_plot.png")
+    plt.close()
     shap_df = pd.DataFrame(data=shap_values, columns=test_df.drop(columns=["y"]).columns, index=test_df.index)
     
+
+    ##################################################### 탁 추가
+    group_0 = test_df[test_df["paeup"] == 0]  # 지속 격자
+    group_1 = test_df[test_df["paeup"] == 1]  # 폐업 격자
+
+    print("test_x shape:", test_x.shape)
+    condition = test_x[:, -1] == 0
+    print("Condition shape:", condition.shape)
+    print("Condition values:", condition)
+
+    filtered_test_x = test_x[condition, :]
+    print("Filtered test_x shape:", filtered_test_x.shape)
+
+    shap_values_0 = explainer.shap_values(test_x[test_x[:,-1]==0,:])
+    plt.figure()
+    shap.summary_plot(shap_values_0, group_0.drop(columns=["y"]), show=False)
+    plt.savefig("shap_keep_df_summary_plot.png")
+    plt.close()
+
+    plt.figure()
+    shap_values_1 = explainer.shap_values(test_x[test_x[:,-1]==1,:])
+    shap.summary_plot(shap_values_1, group_1.drop(columns=["y"]), show=False)
+    plt.savefig("shap_paeup_df_summary_plot.png")
+    plt.close()
+
     
     #%% cal shap_diff
 
@@ -117,9 +152,39 @@ if __name__=="__main__":
     
     #%%
 
-    shap_df['sum_male_60_69'].unstack().plot()
+    plt.figure()
+    target_variable = 'num'
 
+    shap_df[target_variable].unstack().plot()
+    plt.savefig(f'shap_difference_gridwise_{target_variable}.png')
+    plt.close()
 
+    new_train_test_df1 = train_test_df1.reset_index()
+
+    new_train_test_df1 = new_train_test_df1.rename(columns = { 'level_0' : 'date' , 'level_1' : 'polygon_id1'})
+
+    #print(new_train_test_df1)
+
+    #print(new_train_test_df1.columns)
+
+    new_train_test_df1 = new_train_test_df1.loc[new_train_test_df1['polygon_id1'].isin(['다사60ba48bb', '다사60ba49ab'])]
+
+    group_df = new_train_test_df1.groupby(['polygon_id1']).mean()[[
+                                                                'per_deposit',
+                                                                #'bus_board', 
+                                                                #'bus_resembark', 
+                                                                #'subway_board',
+                                                                #'subway_resembark',
+                                                                #'bike_return',
+                                                                #'sum_total_cnt',
+                                                                'sum_male_60_69', 
+                                                                'sum_male_60_691', 
+                                                                #'sum_feml_50_59',
+                                                                #'sum_feml_20_29',
+                                                                #'num',
+                                                                'paeup', 'y']]
+
+    print(group_df)
     
 
 
