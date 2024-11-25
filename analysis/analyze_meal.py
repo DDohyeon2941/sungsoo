@@ -13,6 +13,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from matplotlib import font_manager, rc
 import shap
 import platform
@@ -57,16 +58,40 @@ def split_train_test(total_df):
 
 def train(train_x, train_y):
     best_param = {
-        "max_depth": None,
-        "min_samples_leaf": 1,
-        "min_samples_split": 2,
-        "n_estimators": 100,
+        "rf": {
+            "max_depth": None,
+            "min_samples_leaf": 1,
+            "min_samples_split": 2,
+            "n_estimators": 100,
+        },
+        "xgb": {
+            "n_estimators": 100,
+            "learning_rate": 0.3,
+            "max_depth": 6,
+            "gamma": 0,
+            "subsample": 1,
+        },
+        "lgbm": {
+            "num_iterations": 100,
+            "learning_rate": 0.1,
+            "min_data_in_leaf": 20,
+            "boost_from_average": True,
+        },
     }
-    
-    rf_model = RandomForestRegressor(random_state=42, **best_param)
-    rf_model.fit(train_x, train_y)
-    return rf_model
 
+    # RF
+    rf_model = RandomForestRegressor(random_state=42, **best_param["rf"])
+    rf_model.fit(train_x, train_y)
+
+    # XGB
+    xgb_model = XGBRegressor(random_state=42, **best_param["xgb"])
+    xgb_model.fit(train_x, train_y)
+
+    # LGBM
+    lgbm_model = LGBMRegressor(random_state=42, **best_param["lgbm"])
+    lgbm_model.fit(train_x, train_y)
+
+    return rf_model, xgb_model, lgbm_model
 
 def visualize_importance(fitted_model, test_df):
     # 변수 중요도 추출
@@ -93,18 +118,28 @@ if __name__ == "__main__":
     train_test_df1 = main(
         1, keep_grid=["다사59bb49bb", "다사60ba48bb"], paeup_grid=["다사60ba49bb"]
     )
+
     _, test_df, train_x, train_y, test_x, test_y = split_train_test(train_test_df1)
 
-    fitted_model = train(train_x, train_y)
+    rf_model, xgb_model, lgbm_model = train(train_x, train_y)
 
-    y_pred = fitted_model.predict(test_x)
+    y_pred_rf = rf_model.predict(test_x)
+    y_pred_xgb = xgb_model.predict(test_x)
+    y_pred_lgbm = lgbm_model.predict(test_x)
 
-    mse = mean_squared_error(test_y, y_pred)
-    r2 = r2_score(test_y, y_pred)
+    mse_rf = mean_squared_error(test_y, y_pred_rf)
+    mse_xgb = mean_squared_error(test_y, y_pred_xgb)
+    mse_lgbm = mean_squared_error(test_y, y_pred_lgbm)
+    
+    r2_rf = r2_score(test_y, y_pred_rf)
+    r2_xgb = r2_score(test_y, y_pred_xgb)
+    r2_lgbm = r2_score(test_y, y_pred_lgbm)
 
-    print(f"Mean Squared Error: {mse:.2f}")
-    print(f"R2 Score: {r2:.2f}")
+    print(f"Mean Squared Error: \n RF : {mse_rf:.2f} \n XGB : {mse_xgb:.2f} \n LGBM : {mse_lgbm:.2f}")
+    print(f"R2 Score: \n RF : {r2_rf:.2f} \n XGB : {r2_xgb:.2f} \n LGBM : {r2_lgbm:.2f} ")
 
+    fitted_model = xgb_model
+    
     visualize_importance(fitted_model, test_df)
 
     explainer = shap.TreeExplainer(fitted_model)
@@ -131,5 +166,4 @@ if __name__ == "__main__":
     print(shap_diff.sort_values(ascending=False))
 
     # %%
-
     shap_df["sum_male_60_69"].unstack().plot()
