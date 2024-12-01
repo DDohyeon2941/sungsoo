@@ -266,7 +266,7 @@ def main(cate_mask, keep_grid, paeup_grid):
     train_test_df1.rename(columns={0:'y'}, inplace=True)
 
     
-    train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','sum_total_cnt1','공지지가','환산_보증금'], inplace=True)
+    train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','sum_total_cnt1','공지지가','환산_보증금', 'avg_move_dist1', 'avg_move_time1'], inplace=True)
 
     train_test_df1 = train_test_df1.rename(rename_mapper, axis = 1)
 
