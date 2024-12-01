@@ -7,8 +7,100 @@ Created on Sat Nov 23 16:00:31 2024
 
 import pandas as pd
 import numpy as np
+from matplotlib import cm
 
 pd.options.display.float_format = '{:.2f}'.format
+
+
+############### rename_mapper 추가
+
+rename_mapper = {
+        "avg_move_dist": "Avg Dist",
+        "avg_move_time": "Avg Time",
+        "sum_male_00_19": "Count Male Under 20",
+        "sum_male_20_29": "Count Male 20-29",
+        "sum_male_30_39": "Count Male 30-39",
+        "sum_male_40_49": "Count Male 40-49",
+        "sum_male_50_59": "Count Male 50-59",
+        "sum_male_60_69": "Count Male 60-69",
+        "sum_male_70_79": "Count Male 70-79",
+        "sum_male_80_89": "Count Male 80-89",
+        "sum_feml_00_19": "Count Female Under 20",
+        "sum_feml_20_29": "Count Female 20-29",
+        "sum_feml_30_39": "Count Female 30-39",
+        "sum_feml_40_49": "Count Female 40-49",
+        "sum_feml_50_59": "Count Female 50-59",
+        "sum_feml_60_69": "Count Female 60-69",
+        "sum_feml_70_79": "Count Female 70-79",
+        "sum_feml_80_89": "Count Female 80-89",
+        "sum_male_00_191": "Influx Ratio Male Under 20",
+        "sum_male_20_291": "Influx Ratio Male 20-29",
+        "sum_male_30_391": "Influx Ratio Male 30-39",
+        "sum_male_40_491": "Influx Ratio Male 40-49",
+        "sum_male_50_591": "Influx Ratio Male 50-59",
+        "sum_male_60_691": "Influx Ratio Male 60-69",
+        "sum_male_70_791": "Influx Ratio Male 70-79",
+        "sum_male_80_891": "Influx Ratio Male 80-89",
+        "sum_feml_00_191": "Influx Ratio Female Under 20",
+        "sum_feml_20_291": "Influx Ratio Female 20-29",
+        "sum_feml_30_391": "Influx Ratio Female 30-39",
+        "sum_feml_40_491": "Influx Ratio Female 40-49",
+        "sum_feml_50_591": "Influx Ratio Female 50-59",
+        "sum_feml_60_691": "Influx Ratio Female 60-69",
+        "sum_feml_70_791": "Influx Ratio Female 70-79",
+        "sum_feml_80_891": "Influx Ratio Female 80-89",
+        "bus_board": "Count Bording Bus",
+        "bus_resembark": "Count Alighting Bus",
+        "subway_board": "Count Bording Subway",
+        "subway_resembark": "Count Alighting Subway",
+        "bike_return": "Count Return Bike",
+        "bus_ratio": "Ratio Bording Bus",
+        "subway_ratio": "Ratio Bording Subway",
+        "SO2": "SO2",
+        "CO": "CO",
+        "O3": "O3",
+        "NO2": "NO2",
+        "PM10": "PM10",
+        "PM25": "Pm25",
+        "평균기온(℃)": "Avg Temporature",
+        "최고기온(℃)": "Max Temporature",
+        "최저기온(℃)": "Min Temporature",
+        "평균습도(%rh)": "Avg Humanity",
+        "최저습도(%rh)": "Min Humanity",
+        "면적": "Area",
+        "num": "Store",
+        "per_deposit": "Deposit",
+        "paeup": "Closed"
+    }
+
+############### 시각화 color 추가
+
+paeup_color_mapping = {
+        0: 'blue',   
+        1: 'red'
+    }   
+
+grid_color_mapping = {
+    '지속1': 'SkyBlue',
+    '지속2': 'MediumBlue',
+    
+    '폐업1': 'LightCoral',
+    '폐업2': 'DarkRed'
+}
+
+
+def generate_paeup_subgroup_colors(paeup_color_mapping, num_subgroups):
+    subgroup_color_mapping = {}
+    
+    for paeup, base_color in paeup_color_mapping.items():
+        # Convert the base color name to a colormap
+        colormap = cm.get_cmap(f"{base_color.capitalize()}s", num_subgroups)
+        # Generate shades for subgroups
+        shades = [colormap(i) for i in range(colormap.N)]
+        # Map shades to subgroup IDs
+        subgroup_color_mapping[paeup] = {subgroup_id: shades[subgroup_id] for subgroup_id in range(num_subgroups)}
+    
+    return subgroup_color_mapping
 
 def get_saup(cate_mask):
     saup_df = pd.read_csv(r'saup_number.csv', index_col=0, header=[0,1])
@@ -161,7 +253,6 @@ def get_weather(paeup_grid, keep_grid):
     return new_weather_df
 
 
-
 def main(cate_mask, keep_grid, paeup_grid):
 
     var5 = get_saup(cate_mask)
@@ -176,6 +267,8 @@ def main(cate_mask, keep_grid, paeup_grid):
 
     
     train_test_df1.drop(columns=['건축면적', '연면적','용적율','건폐율','건물높이','sum_total_cnt','sum_total_cnt1','공지지가','환산_보증금'], inplace=True)
+
+    train_test_df1 = train_test_df1.rename(rename_mapper, axis = 1)
 
     train_test_df1= train_test_df1.reset_index().set_index(['level_0','level_1']).sort_index()
 
