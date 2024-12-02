@@ -270,6 +270,8 @@ def main(cate_mask, keep_grid, paeup_grid):
 
     train_test_df1 = train_test_df1.rename(rename_mapper, axis = 1)
 
+    train_test_df1.drop(columns=['Area','Deposit'], inplace=True)
+
     train_test_df1= train_test_df1.reset_index().set_index(['level_0','level_1']).sort_index()
 
     return train_test_df1
