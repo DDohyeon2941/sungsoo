@@ -86,6 +86,7 @@ def filter_cols_under_2020(df):
 
 def index_sungsoo_paeup(df):
     new_df = df[df['siteWhlAddr'].str.contains('성수') | df['rdnWhlAddr'].str.contains('성수')]
+    new_df = new_df.loc[new_df['opnSfTeamCode'] == '3030000']
     new_df = new_df.reset_index(drop=True)
     return new_df
 
@@ -184,12 +185,10 @@ def calculate_paeup_ratio(group_df):
 if __name__ == "__main__":
     entire_paeup_df = make_csv_file(r'6110000_XML.zip')
     entire_paeup_df = filter_cols_under_2020(entire_paeup_df)
-
     sungsoo_df = index_sungsoo_paeup(entire_paeup_df)
 
     entire_grouped_df = integrate_paeup(entire_paeup_df)
     paeup_ratio_df = calculate_paeup_ratio(entire_grouped_df)
-
 
     sungsoo_df.to_csv(r'store_status_sungsoo_20250115.csv', index=False)
     paeup_ratio_df.to_csv(r'paeup_ratio_added_20250115.csv', index=False)
