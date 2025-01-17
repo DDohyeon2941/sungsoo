@@ -61,7 +61,8 @@ def mask_grid(paeup_df, shp_df):
 if __name__ == "__main__":
     """3차 필터링 (업종)"""
     # 폐업 데이터셋 불러오기
-    temp_df = pd.read_csv(r'C:\Users\dohyeon\Downloads\store_status_seungsu.csv')
+    #temp_df = pd.read_csv(r'C:\Users\dohyeon\Downloads\store_status_seungsu.csv')
+    temp_df = pd.read_csv(r'store_status_sungsoo_20250115.csv')
 
     # sales 데이터와 매칭이 되는 업종 선정
     unique_name = temp_df['opnSvcNm'].unique()
@@ -208,7 +209,7 @@ if __name__ == "__main__":
     axes1.set_xlabel('중분류')
     axes1.set_ylabel('격자')
     axes1.set_title('격자별 중분류별 기간내 폐업수')
-    
+    #%%
     # 바 그래프
     (t1[[0,1,2]].sum(axis=1)).sort_values(ascending=False).plot(kind='bar', xlabel='격자', ylabel='폐업수', title='격자별 기간내 폐업총수')
     
