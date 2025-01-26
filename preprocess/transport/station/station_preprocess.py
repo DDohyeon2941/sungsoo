@@ -1,11 +1,7 @@
 import pandas as pd
 import os
-from pyproj import Transformer
-from shapely.geometry import Point
 
-def extract_subway_info():
-
-    master_df = pd.read_csv('./datasets/station/raw/station_master.csv', encoding = 'CP949')
+def extract_subway_info(master_df, raw_dataset_dir):
 
     new_column_names_master = ['row', 'line', 'unique_code', 'st_nm', 'latitude', 'longtitude', 'est_date']
 
@@ -13,11 +9,10 @@ def extract_subway_info():
 
     dataframes = []
 
-    directory = './datasets/station/raw/'
     encodings_to_try = ['utf-8-sig', 'cp949', 'utf-16', 'latin1']
-    for filename in os.listdir(directory):
+    for filename in os.listdir(raw_dataset_dir):
         if filename.startswith('CARD_SUBWAY_MONTH_'):
-            file_path = os.path.join(directory, filename)
+            file_path = os.path.join(raw_dataset_dir, filename)
             
             for encoding in encodings_to_try:
                 try:
@@ -39,12 +34,32 @@ def extract_subway_info():
             print(f"Processed file: {filename}")
 
     combined_df = pd.concat(dataframes, ignore_index=True)
+    return combined_df
 
-    # Save the combined DataFrame to a CSV file
-    combined_df.to_csv('./datasets/station/seongsu/seoungsu_card_subway_data.csv', index=False, encoding='utf-8-sig')
-
-def main():
-    extract_subway_info()
 
 if __name__ == "__main__":
-    main()
+
+
+    master_df = pd.read_csv('station_master.csv', encoding = 'CP949')
+    dataset_dir = r'dataset'
+
+    subway_df = extract_subway_info(master_df, dataset_dir)
+
+    subway_df.to_csv(r'seoungsu_card_subway_data.csv', index=False, encoding='utf-8-sig')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

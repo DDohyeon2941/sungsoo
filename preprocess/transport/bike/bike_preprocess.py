@@ -1,12 +1,9 @@
 import pandas as pd
 from pyproj import Transformer
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point
 from shapely import wkt
 from tqdm import tqdm
-import os
-
 import zipfile
-import io
 import numpy as np
 
 transformer = Transformer.from_crs("epsg:4326", "epsg:5179")
@@ -15,17 +12,15 @@ def transform_coordinates(lat, lon):
         x, y = transformer.transform(lat, lon)
         return x, y
 
-def get_seongsu_bike():
+def get_seongsu_bike(master_df, polygon_df):
     """
         성수 bike 정류장 정보 가져오기
     """
-    master_df = pd.read_csv('datasets/bike/raw/station_master.csv', encoding='cp949')
     new_column_names_master = ['st_id', 'addr1', 'addr2', 'latitude', 'longtitude']
     master_df.columns = new_column_names_master
 
     master_df['y'], master_df['x'] = zip(*master_df.apply(lambda row: transform_coordinates(row['latitude'], row['longtitude']), axis=1))
 
-    polygon_df = pd.read_csv('datasets/polygon/sungsoo_match_60_polygon.csv', encoding='ISO-8859-1')
     new_column_names_polygon = ['cell_id_1', 'cell_id_2', 'cell_info']
     polygon_df.columns = new_column_names_polygon
 
@@ -46,7 +41,7 @@ def get_seongsu_bike():
 
     master_df = master_df.loc[(master_df['cell_id_1'].notna()) | (master_df['cell_id_2'].notna())]
     master_df = master_df.drop(['cell_id_1', 'cell_id_2'], axis = 1)
-    master_df.to_csv('datasets/bike/seongsu/bike_master_added.csv', index=False, encoding='cp949')
+    return master_df
 
 def calculate_return_hour(row):
     """
@@ -73,15 +68,13 @@ def calculate_return_hour(row):
     return_hour = new_hour * 100 + new_minute
     return return_hour
 
-
-def extract_bike_info(start_month, end_month):
+def extract_bike_info(master_df, start_month, end_month):
     """
         start_month: yyyymm
         end_month: yyyymm
         따릉이 승하차 정보 추출
     """
-    station_master = pd.read_csv('datasets/bike/seongsu/bike_master_added.csv', encoding='cp949')
-    valid_stations = station_master['st_id'].tolist()
+    valid_stations = master_df['st_id'].tolist()
 
     combined_csv_file = 'datasets/bike/seongsu/seongsu_combined_bike_202301_202406.csv'
 
@@ -134,14 +127,35 @@ def extract_bike_info(start_month, end_month):
     combined_data = pd.concat(all_data, ignore_index=True)
 
     combined_data = combined_data.sort_values(by='date', ascending=True)
-
-    combined_data.to_csv(combined_csv_file, index=False, encoding = 'cp949')
-    
     print(f"Combined data saved to {combined_csv_file}")
 
-def main():
-    get_seongsu_bike()
-    extract_bike_info()
+    return combined_data
+
+
+
 
 if __name__ == "__main__":
-    main()
+
+    master_df = pd.read_csv('station_master.csv', encoding='cp949')
+    polygon_df= pd.read_csv(r'..\..\sales\sungsoo_2nd_drop_polygons_45.csv', index_col=0)
+
+    added_master_df = get_seongsu_bike(master_df, polygon_df)
+
+    final_df = extract_bike_info(added_master_df, '202301', '202406')
+
+    added_master_df.to_csv(r'bike_master.csv', index=False)
+    final_df.to_csv(r'seongsu_combined_bike_202301_202406.csv', index=False, encoding = 'cp949')
+
+
+    """
+    final_df 파일은 202301-202406까지의 데이터셋이나, 이를 2023년과 2024년으로 나누어 저장하였음
+    하지만 이에 대한 코드는 생략
+
+    출력정보: seongsu_bike_2023.csv, seongsu_bike_2024.csv
+
+    """
+
+
+
+
+
