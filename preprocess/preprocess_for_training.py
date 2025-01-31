@@ -124,13 +124,17 @@ def index_transport_for_grid(var5, new_transport_df, keep_grid, paeup_grid):
 
     return new_transport_df
 
-def get_moving(new_transport_df):
+def get_moving(new_transport_df,
+               dir2023=r'moving\sungsoo_grid_arrival_2023_20241114.csv',
+               dir2024=r'moving\sungsoo_grid_arrival_2024_20241114.csv',
+               dir20231=r'moving\sungsoo_grid_arrival_2023_20241125.csv',
+               dir20241=r'moving\sungsoo_grid_arrival_2024_20241125.csv'):
 
-    moving_df_2023 = pd.read_csv(r'moving\sungsoo_grid_arrival_2023_20241114.csv')
-    moving_df_2024 = pd.read_csv(r'moving\sungsoo_grid_arrival_2024_20241114.csv')
+    moving_df_2023 = pd.read_csv(dir2023)
+    moving_df_2024 = pd.read_csv(dir2024)
 
-    moving_df_20231 = pd.read_csv(r'moving\sungsoo_grid_arrival_2023_20241125.csv')
-    moving_df_20241 = pd.read_csv(r'moving\sungsoo_grid_arrival_2024_20241125.csv')
+    moving_df_20231 = pd.read_csv(dir20231)
+    moving_df_20241 = pd.read_csv(dir20241)
 
 
     moving_df_2023.loc[:, 'date'] = pd.to_datetime(moving_df_2023['date'])
@@ -186,28 +190,40 @@ def conv_weather(weather_df, transport_df, keep_grid, paeup_grid):
     filtered_df['use_date'] = pd.to_datetime(filtered_df['use_date'])
     return pd.merge(filtered_df, weather_df, left_on='use_date', right_on = '일시',how='left')
 
-def main(cate_mask, paeup_grid, keep_grid):
-    saup_df = pd.read_csv(r'paeup\saup_number.csv', index_col=0, header=[0,1])
-    sales_df = pd.read_csv(r'sales\card_category_conditioned_processed.csv', encoding='cp949', index_col=0)
-    weather_df = get_weather(pd.read_csv(r'weather\weather.csv').dropna())
+def main(cate_mask,
+         paeup_grid,
+         keep_grid,
+         saup_dir=r'paeup\saup_number.csv',
+         sales_dir=r'sales\card_category_conditioned_processed.csv',
+         weather_dir=r'weather\weather.csv',
+         transport_dir=r'transport\sungsoo_prep_transport_by_dohyeon_20241115.csv',
+         moving_dir_dict={}):
+    saup_df = pd.read_csv(saup_dir, index_col=0, header=[0,1])
+    sales_df = pd.read_csv(sales_dir, encoding='cp949', index_col=0)
+    weather_df = get_weather(pd.read_csv(weather_dir).dropna())
 
     var5 = get_saup(cate_mask, saup_df)
 
-    transport_df = pd.read_csv(r'transport\sungsoo_prep_transport_by_dohyeon_20241115.csv')
+    transport_df = pd.read_csv(transport_dir)
 
     new_transport_df = index_transport_for_grid(var5, transport_df, keep_grid, paeup_grid)
-    new_moving_df = get_moving(new_transport_df)
+    new_moving_df = get_moving(new_transport_df,
+                               moving_dir_dict['2023'],
+                               moving_dir_dict['2024'],
+                               moving_dir_dict['20231'],
+                               moving_dir_dict['20241'])
 
 
     new_target_df = get_target(cate_mask, sales_df, keep_grid, paeup_grid )
 
     new_weather_df = conv_weather(weather_df, transport_df, keep_grid, paeup_grid)
+    new_weather_df.drop(columns=['bike_return','bus_board','bus_resembark','subway_board','subway_resembark'], inplace=True)
     new_weather_df.set_index(['use_date','Unnamed: 1'], inplace=True)
 
 
     train_test_df = pd.concat([new_weather_df, new_moving_df, new_transport_df, new_target_df], axis=1)
     train_test_df.rename(columns={0:'y'}, inplace=True)
-    train_test_df.drop(columns=['sum_total_cnt','sum_total_cnt1', 'avg_move_dist1', 'avg_move_time1'], inplace=True)
+    train_test_df.drop(columns=['sum_total_cnt','sum_total_cnt1', 'avg_move_dist1', 'avg_move_time1','일시'], inplace=True)
     train_test_df = (train_test_df.rename(rename_mapper, axis = 1)).dropna()
     train_test_df = train_test_df.reset_index().set_index(['level_0','level_1']).sort_index()
     return train_test_df
@@ -216,6 +232,34 @@ def main(cate_mask, paeup_grid, keep_grid):
 #%%
 if __name__ == "__main__":
 
-    t1 = main(0, keep_grid= ['다사59bb49ba'], paeup_grid = ['다사60ab50aa', '다사60ab49ab'])
+    moving_dir_dict = {'2023':r'moving\sungsoo_grid_arrival_2023_20241114.csv',
+                       '2024':r'moving\sungsoo_grid_arrival_2024_20241114.csv',
+                       '20231':r'moving\sungsoo_grid_arrival_2023_20241125.csv',
+                       '20241':r'moving\sungsoo_grid_arrival_2024_20241125.csv'}
+    t1 = main(0, keep_grid= ['다사59bb49ba'], paeup_grid = ['다사60ab50aa', '다사60ab49ab'], moving_dir_dict=moving_dir_dict)
 
     t1.loc['2023']
+
+    saup_df = pd.read_csv(r'paeup\saup_number.csv', index_col=0, header=[0,1])
+    var5 = get_saup(0, saup_df)
+    var5
+    transport_df = pd.read_csv(r'transport\sungsoo_prep_transport_by_dohyeon_20241115.csv')
+
+    new_transport_df = index_transport_for_grid(var5, transport_df,keep_grid= ['다사59bb49ba'], paeup_grid = ['다사60ab50aa', '다사60ab49ab'])
+    new_transport_df.columns
+
+    new_moving_df = get_moving(new_transport_df,
+                               moving_dir_dict['2023'],
+                               moving_dir_dict['2024'],
+                               moving_dir_dict['20231'],
+                               moving_dir_dict['20241'])
+    weather_df = get_weather(pd.read_csv(r'weather\weather.csv').dropna())
+    new_weather_df = conv_weather(weather_df, transport_df, keep_grid= ['다사59bb49ba'], paeup_grid = ['다사60ab50aa', '다사60ab49ab'])
+    new_weather_df.set_index(['use_date','Unnamed: 1'], inplace=True)
+
+
+    new_weather_df.columns
+    new_transport_df.columns
+    new_moving_df.columns
+
+
