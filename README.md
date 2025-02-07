@@ -98,7 +98,7 @@ python analysis/visualize_paup_ratio.py #폐업비율을 시각화
 - **머신러닝 모델**: Random Forest, XGBoost, LightGBM
 - **설치 환경**: Anaconda, Python 3.8
 
-##👥 기여자
+## 👥 기여자
 
 이도현 (skypo1000@ds.seoultech.ac.kr, [GitHub](https://github.com/DDohyeon2941))
 
