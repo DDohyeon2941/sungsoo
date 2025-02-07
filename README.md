@@ -98,6 +98,13 @@ python analysis/visualize_paup_ratio.py #폐업비율을 시각화
 - **머신러닝 모델**: Random Forest, XGBoost, LightGBM
 - **설치 환경**: Anaconda, Python 3.8
 
+##👥 기여자
+
+이도현 (skypo1000@ds.seoultech.ac.kr, [GitHub](https://github.com/DDohyeon2941))
+
+탁승연 (kim@example.com, GitHub)
+
+이희준 (lee@example.com, GitHub)
 
 ✨ 이 프로젝트는 성수동 상권의 지속 가능성을 연구하고, 데이터 기반 인사이트를 제공하는 데 초점을 맞추고 있습니다. 많은 관심과 기여 부탁드립니다! 🚀
 
