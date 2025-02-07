@@ -123,184 +123,6 @@ def visualize_importance(fitted_model, test_df):
     #plt.show()
     plt.close()
 
-def visualize_grid_paeup_distribution(train_test_df1, target_variable, target_scope):
-    train_test_df1= train_test_df1.reset_index().rename(columns = {'level_0' : 'date', 'level_1' : 'polygon_id1'} ).sort_index()
-
-    #train_test_df1 = train_test_df1.loc[train_test_df1['polygon_id1'] != '다사60ba49ab']
-
-    print(train_test_df1.columns)
-
-    train_test_df1['polygon_id1'] = train_test_df1['polygon_id1'].replace(grid_name_mapping)
-    train_test_df1['Closed'] = train_test_df1['Closed'].replace(paeup_name_mapping)
-
-    #plt.figure(figsize=(12, 6))  # Adjust these values as needed
-
-    # Use the color mapping in the plot
-
-    if target_scope == 'grid':
-        sns.lineplot(data=train_test_df1, x='date', y=target_variable, hue='polygon_id1', palette=grid_color_mapping)
-        target_suffix = 'grid'
-        legend_title = '격자 특성'
-    elif target_scope == 'paeup':
-        sns.lineplot(data=train_test_df1, x='date', y=target_variable, hue='Closed', palette = paeup_color_mapping, ci=None)
-        target_suffix = 'paeup'
-        legend_title = 'Closed'
-
-    # Set labels and title
-    plt.xlabel('Date')
-    plt.ylabel(f'{target_variable}')
-    #plt.title(f'{target_variable} by Date and Polygon ID')
-    plt.legend(title=legend_title)
-    
-    # Show the plot
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig(f'images/{target_suffix}_{target_variable}_2.png')
-    #plt.show()
-    plt.close()
-
-def visualize_grid_paeup_bar_distribution(train_test_df1, target_variable):
-    train_test_df1 = train_test_df1.reset_index().rename(columns={'level_0': 'date', 'level_1': 'polygon_id1'}).sort_index()
-
-    grid_name_mapping = {
-        '다사60aa49bb': '역세권 (지속)',   # 뚝섬역
-        '다사60ba49ab': '가죽거리 (지속)',   # 가죽거리
-        '다사60ba49bb': '정비소 (폐업)',    # 정비소
-        '다사60ba48bb': '뚝도시장 (폐업)', # 뚝도시장
-    }
-
-    # Ensure new train_test_df1 is correctly set up
-    new_train_test_df1 = train_test_df1.rename(columns={"level_0": "date", "level_1": "polygon_id1"})
-
-    # Filter by relevant categories
-    new_train_test_df1 = new_train_test_df1.loc[new_train_test_df1["polygon_id1"].isin(keep_grid + paeup_grid)]
-
-    # Replace polygon_id1 values with mapped names
-    new_train_test_df1["polygon_id1"] = new_train_test_df1["polygon_id1"].replace(grid_name_mapping)
-
-    # Filter data for each category
-    filtered_data1 = new_train_test_df1[new_train_test_df1["polygon_id1"] == "역세권 (지속)"]
-    filtered_data2 = new_train_test_df1[new_train_test_df1["polygon_id1"] == "가죽거리 (지속)"]
-    filtered_data3 = new_train_test_df1[new_train_test_df1["polygon_id1"] == "정비소 (폐업)"]
-    filtered_data4 = new_train_test_df1[new_train_test_df1["polygon_id1"] == "뚝도시장 (폐업)"]
-
-    # Create a DataFrame with mean values for each category
-    mean_data_age_list = pd.DataFrame(
-        {
-            "Value": [
-                filtered_data1[target_variable].mean(),
-                filtered_data2[target_variable].mean(),
-                filtered_data3[target_variable].mean(),
-                filtered_data4[target_variable].mean()
-            ]
-        },
-        index=["역세권 (지속)", "가죽거리 (지속)", "정비소 (폐업)", "뚝도시장 (폐업)"]  # Providing the index
-    )
-
-    # Plot using seaborn to get better control over color mapping
-    sns.barplot(
-        data=mean_data_age_list.reset_index(),  # Convert DataFrame to have 'index' as a column for seaborn
-        x='index',
-        y='Value',
-        palette=['SkyBlue', 'MediumBlue', 'LightCoral', 'DarkRed']  # Define custom colors for each category
-    )
-
-    plt.xticks(rotation=45)
-    #plt.legend(title="격자 특성", loc="lower right")
-    plt.xlabel("Category")
-    plt.ylabel(f'{target_variable} Mean Value')
-    plt.tight_layout()
-    plt.show()
-    plt.savefig(f'images/bar_{target_variable}.png')
-    plt.close()
-
-def visualize_within_grid(train_test_df1, target_grid, ratio_flag = False):
-    train_test_df1= train_test_df1.reset_index().rename(columns = {'level_0' : 'date', 'level_1' : 'polygon_id1'} ).sort_index()
-
-    grid_name_mapping = {
-        '다사60aa49bb': '뚝섬역',   # 뚝섬역
-        '다사60ba49ab': '가죽거리',   # 가죽거리
-        '다사60ba49bb': '정비소',    # 정비소
-        '다사60ba48bb': '뚝도시장', # 뚝도시장
-
-    }
-
-    train_test_df1 = train_test_df1.loc[train_test_df1["polygon_id1"] == target_grid]
-
-    train_test_df1['polygon_id1'] = train_test_df1['polygon_id1'].replace(grid_name_mapping)
-
-    sum_male_columns = [column for column in train_test_df1.columns if column.startswith("sum_male") and column.endswith("1")]
-
-    sum_feml_columns = [column for column in train_test_df1.columns if column.startswith("sum_feml") and column.endswith("1")]
-
-    train_test_male_df1 = train_test_df1[['date', 'polygon_id1'] + sum_male_columns]
-    train_test_feml_df1 = train_test_df1[['date', 'polygon_id1'] + sum_feml_columns]
-
-    print(train_test_male_df1)
-
-    long_male_df = train_test_male_df1.melt(
-        id_vars=['date', 'polygon_id1'],  # Columns to keep
-        value_vars=sum_male_columns,      # Columns to unpivot
-        var_name='male_type',             # New column name for variable
-        value_name='value'                # New column name for values
-    )
-
-    
-
-    long_feml_df = train_test_feml_df1.melt(
-        id_vars=['date', 'polygon_id1'],  # Columns to keep
-        value_vars=sum_feml_columns,      # Columns to unpivot
-        var_name='feml_type',             # New column name for variable
-        value_name='value'                # New column name for values
-    )
-
-    # Create the plot
-    plt.figure(figsize=(12, 6))
-
-    male_palette = sns.color_palette("hls", n_colors=len(long_male_df['male_type'].unique()))
-    feml_palette = sns.color_palette("husl", n_colors=len(long_feml_df['feml_type'].unique()))
-
-    avg_male_values = long_male_df.groupby('male_type')['value'].mean().reset_index()
-    avg_feml_values = long_feml_df.groupby('feml_type')['value'].mean().reset_index()
-    # Step 2: Create a bar plot
-    plt.figure(figsize=(10, 6))
-    sns.barplot(
-        data=avg_male_values,
-        x='male_type',
-        y='value',
-        palette=male_palette  # Use the same palette for consistency
-    )
-
-    # Customize the plot
-    plt.title('Average Values for Each Male Type')
-    plt.xlabel('Male Type')
-    plt.ylabel('Average Value')
-    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
-    plt.tight_layout()
-    #plt.show()
-    plt.savefig(f'images/influx_ratio_male_{target_grid}.png')
-
-    plt.close()
-
-    plt.figure(figsize=(10, 6))
-    sns.barplot(
-        data=avg_feml_values,
-        x='feml_type',
-        y='value',
-        palette=feml_palette  # Use the same palette for consistency
-    )
-
-    # Customize the plot
-    plt.title('Average Values for Each Female Type')
-    plt.xlabel('Female Type')
-    plt.ylabel('Average Value')
-    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
-    plt.tight_layout()
-    #plt.show()
-    plt.savefig(f'images/influx_ratio_feml_{target_grid}.png')
-
-    plt.close()
-
 def get_dohyeon_evaluation(test_df, y_pred, test_y, train_x, train_y, paeup_grid, keep_grid, fitted_model):
     test_df1 = pd.DataFrame(index=test_df.index)
     test_df1.loc[:,'pred_y'] = y_pred
@@ -451,30 +273,17 @@ if __name__=="__main__":
                           weather_dir=r'..\preprocess\weather\weather.csv',
                           transport_dir=r'..\preprocess\transport\sungsoo_prep_transport_by_dohyeon_20241115.csv',
                           moving_dir_dict=moving_dir_dict)
-    #%%
-    #train_test_df1 = main(0, keep_grid = keep_grid, paeup_grid = paeup_grid)
+  
     _, test_df, train_x, train_y, test_x, test_y = split_train_test(train_test_df1)
     fitted_model = train(train_x, train_y)
     y_pred = fitted_model.predict(test_x)
     
-    print("keep")
     get_evaluations(test_y, y_pred)
-    r2_test = r2_score(test_y, y_pred)
-    r2_train = fitted_model.score(train_x, train_y) 
-
-    r2 = r2_score(np.exp(test_y)-1, np.exp(y_pred)-1)
-
-    r2_train = fitted_model.score(train_x,train_y)
-
-    print("r2 test: ", r2_test)
-    print("r2 train: ", r2_train)
 
     get_dohyeon_evaluation(test_df, paeup_grid=paeup_grid, keep_grid=keep_grid, fitted_model = fitted_model
                            , y_pred = y_pred, test_y = test_y, train_x = train_x, train_y = train_y)
 
-    #get_shap(fitted_model, test_df, test_x)
+    get_shap(fitted_model, test_df, test_x)
     
-    #visualize_within_grid(train_test_df1, target_grid="다사60ba49bb", ratio_flag = False)
-    
-    #visualize_raw_df(cate_mask, paeup_grid, keep_grid, target_variable= 'sum_amount')
+    visualize_raw_df(cate_mask, paeup_grid, keep_grid, target_variable= 'sum_amount')
     
