@@ -1,8 +1,8 @@
 # Sungsoo Project
 
-# Sungsoo Project
+## 🏆 수상 이력
 
-
+본 프로젝트는 2024 성동구 빅데이터 펠로우십에서 우수상을 수상한 프로젝트입니다. 🎉
 
 ## 📌 프로젝트 소개
 
@@ -51,7 +51,8 @@ conda activate sungsoo
 python analysis/analyze_korean.py  # 한식 업종에 대해서 모델 학습 및 분석
 python analysis/analyze_meal.py  # 외국음식 업종에 대해서 모델 학습 및 분석
 python analysis/analyze_cafe.py  # 카페 업종에 대해서 모델 학습 및 분석
-
+python analysis/visualize_correlation_moving_sales.py #유동인구와 매출액간 상관관계 분석
+python analysis/visualize_paup_ratio.py #폐업비율을 시각화
 ```
 
 ## 🎯 연구 목표
@@ -81,6 +82,14 @@ python analysis/analyze_cafe.py  # 카페 업종에 대해서 모델 학습 및 
    - 폐업 격자는 유동 인구가 많아도 매출이 낮은 경향
    - 지속 가능 상권은 주요 고객층(20\~40대 유동 인구)과의 높은 연관성을 보임
    - 대중교통 접근성이 폐업 및 지속 가능성에 영향을 미치는 주요 변수로 확인됨
+
+## 📢 프로젝트 활용 및 기대 효과
+
+데이터 기반 정책 수립: 성동구청 및 관련 기관에서 상권 지속 가능성 평가에 활용 가능
+
+창업 및 폐업 예측 모델: 창업자들에게 유용한 상권 데이터 제공
+
+젠트리피케이션 분석: 임대료 상승 및 유동 인구 변화를 반영한 정책 수립 지원
 
 ## 🛠️ 사용 기술
 
