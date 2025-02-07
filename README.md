@@ -104,7 +104,7 @@ python analysis/visualize_paup_ratio.py #폐업비율을 시각화
 
 탁승연 (kim@example.com, GitHub)
 
-이희준 (lee@example.com, GitHub)
+이희준 (bok_h22@ds.seoultech.ac.kr, [GitHub](https://github.com/bok-h22))
 
 ✨ 이 프로젝트는 성수동 상권의 지속 가능성을 연구하고, 데이터 기반 인사이트를 제공하는 데 초점을 맞추고 있습니다. 많은 관심과 기여 부탁드립니다! 🚀
 
