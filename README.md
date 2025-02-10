@@ -102,7 +102,7 @@ python analysis/visualize_paup_ratio.py #폐업비율을 시각화
 
 이도현 (skypo1000@ds.seoultech.ac.kr, [GitHub](https://github.com/DDohyeon2941))
 
-탁승연 (kim@example.com, GitHub)
+탁승연 (sytak@ds.seoultech.ac.kr, [GitHub](https://github.com/SyngyeonTak))
 
 이희준 (bok_h22@ds.seoultech.ac.kr, [GitHub](https://github.com/bok-h22))
 
